@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BioQuest — Desafio de Biologia</title>
+<style>
+:root{
+  --bg:#071b16; --panel:#0d2a22; --panel2:#12382d; --accent:#48e08a;
+  --accent2:#b8ffcf; --text:#f4fff8; --muted:#a9c5b7; --danger:#ff647c;
+  --gold:#ffd166; --border:rgba(255,255,255,.10);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh; font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;
+  color:var(--text); background:
+  radial-gradient(circle at 15% 10%,rgba(72,224,138,.16),transparent 28%),
+  radial-gradient(circle at 90% 85%,rgba(67,153,255,.10),transparent 30%),var(--bg);
+}
+button{font:inherit}
+.app{width:min(1100px,94%);margin:0 auto;padding:28px 0 45px}
+header{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:22px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#1c9b63);display:grid;place-items:center;font-size:25px;box-shadow:0 10px 30px rgba(72,224,138,.2)}
+.logo h1{font-size:21px;margin:0}.logo p{margin:3px 0 0;color:var(--muted);font-size:13px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.stat{background:rgba(13,42,34,.86);border:1px solid var(--border);padding:9px 13px;border-radius:12px;font-size:13px}
+.stat b{color:var(--accent2)}
+.screen{display:none}.screen.active{display:block}
+.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}
+.card{background:linear-gradient(145deg,rgba(18,56,45,.96),rgba(10,35,29,.96));border:1px solid var(--border);border-radius:24px;padding:30px;box-shadow:0 18px 50px rgba(0,0,0,.2)}
+.hero h2{font-size:clamp(30px,5vw,55px);line-height:1;margin:10px 0 15px;letter-spacing:-2px}
+.hero h2 span{color:var(--accent)}
+.hero p{color:var(--muted);line-height:1.7}
+.btn{border:0;border-radius:14px;padding:13px 18px;cursor:pointer;font-weight:800;transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.06)}
+.btn.primary{background:var(--accent);color:#052014}.btn.secondary{background:#183e32;color:white;border:1px solid var(--border)}
+.mode-grid{display:grid;gap:12px;margin-top:20px}
+.mode{padding:16px;border-radius:15px;border:1px solid var(--border);background:rgba(255,255,255,.03);cursor:pointer;text-align:left;color:var(--text)}
+.mode:hover,.mode.selected{border-color:var(--accent);background:rgba(72,224,138,.08)}
+.mode strong{display:block}.mode small{display:block;color:var(--muted);margin-top:4px}
+.hud{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:18px}
+.progress-wrap{flex:1}.progress-text{font-size:13px;color:var(--muted);margin-bottom:7px}
+.progress{height:9px;background:#17372e;border-radius:20px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#a1ffbd);transition:.4s}
+.lives{color:var(--danger);font-size:18px;white-space:nowrap}
+.question-card{max-width:850px;margin:auto}
+.category{color:var(--accent);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px}
+.question{font-size:clamp(23px,4vw,34px);line-height:1.2;margin:12px 0 22px}
+.options{display:grid;gap:12px}
+.option{width:100%;text-align:left;padding:17px 18px;border-radius:15px;border:1px solid var(--border);background:#102f26;color:var(--text);cursor:pointer;display:flex;gap:14px;align-items:center;transition:.2s}
+.option .letter{min-width:33px;height:33px;border-radius:10px;background:#1a4437;display:grid;place-items:center;font-weight:900;color:var(--accent2)}
+.option:hover{border-color:var(--accent);transform:translateX(3px)}
+.option.correct{background:rgba(72,224,138,.13);border-color:var(--accent)}
+.option.wrong{background:rgba(255,100,124,.12);border-color:var(--danger)}
+.option:disabled{cursor:default}
+.explanation{margin-top:17px;padding:15px;border-radius:14px;background:rgba(255,255,255,.045);color:var(--muted);line-height:1.55;display:none}
+.explanation.show{display:block}
+.actions{display:flex;justify-content:flex-end;margin-top:18px}
+.timer{min-width:72px;text-align:center;font-weight:900;color:var(--gold)}
+.timer.danger{color:var(--danger);animation:pulse .7s infinite alternate}
+@keyframes pulse{to{transform:scale(1.08)}}
+.results{text-align:center;max-width:760px;margin:auto}
+.score{font-size:76px;font-weight:950;color:var(--accent);margin:5px}
+.rank{font-size:20px;color:var(--gold);font-weight:800}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:25px 0}
+.result-box{padding:18px;background:#102f26;border:1px solid var(--border);border-radius:15px}.result-box b{font-size:25px;display:block}.result-box span{color:var(--muted);font-size:12px}
+.review{text-align:left;margin-top:25px}.review-item{padding:13px 15px;border-bottom:1px solid var(--border);font-size:14px}.review-item span{color:var(--muted);display:block;margin-top:5px}
+.footer{text-align:center;color:#6e9182;font-size:12px;margin-top:20px}
+@media(max-width:750px){.hero{grid-template-columns:1fr}.card{padding:22px}.stats{display:none}.result-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="logo"><div class="logo-icon">🧬</div><div><h1>BioQuest</h1><p>Desafio de Biologia • 2º ano do Ensino Médio</p></div></div>
+  <div class="stats"><div class="stat">🏆 Recorde: <b id="record">0</b></div><div class="stat">⭐ XP: <b id="xp">0</b></div></div>
+</header>
+
+<section id="home" class="screen active">
+  <div class="hero">
+    <div class="card">
+      <div class="category">MISSÃO BIOLÓGICA</div>
+      <h2>Você consegue chegar ao <span>nível máximo?</span></h2>
+      <p>Teste seus conhecimentos em genética, evolução, ecologia, fisiologia, citologia e metabolismo. Cada resposta certa aumenta sua pontuação — mas as perguntas ficam mais desafiadoras.</p>
+      <button class="btn primary" onclick="startGame()">🚀 Começar desafio</button>
+    </div>
+    <div class="card">
+      <h3>🎮 Como jogar</h3>
+      <div class="mode-grid">
+        <div class="mode selected"><strong>⚡ Modo Desafio</strong><small>10 perguntas • 20 segundos por questão</small></div>
+        <div class="mode"><strong>❤️ 3 vidas</strong><small>Erre até três vezes antes do fim da partida.</small></div>
+        <div class="mode"><strong>🔥 Combo</strong><small>Acertos consecutivos rendem pontos extras.</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="quiz" class="screen">
+  <div class="hud">
+    <div class="progress-wrap"><div class="progress-text" id="progressText">Pergunta 1 de 10</div><div class="progress"><div class="bar" id="bar"></div></div></div>
+    <div class="timer" id="timer">20s</div><div class="lives" id="lives">❤️❤️❤️</div>
+  </div>
+  <div class="card question-card">
+    <div class="category" id="category">GENÉTICA</div>
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+    <div class="explanation" id="explanation"></div>
+    <div class="actions"><button id="nextBtn" class="btn primary" style="display:none" onclick="nextQuestion()">Próxima →</button></div>
+  </div>
+</section>
+
+<section id="results" class="screen">
+  <div class="card results">
+    <div class="category">MISSÃO CONCLUÍDA</div>
+    <h2>Seu resultado</h2>
+    <div class="score" id="finalScore">0</div>
+    <div class="rank" id="rank">Pesquisador iniciante</div>
+    <div class="result-grid">
+      <div class="result-box"><b id="correctCount">0</b><span>Acertos</span></div>
+      <div class="result-box"><b id="accuracy">0%</b><span>Aproveitamento</span></div>
+      <div class="result-box"><b id="comboMax">0x</b><span>Maior combo</span></div>
+    </div>
+    <button class="btn primary" onclick="startGame()">🔄 Jogar novamente</button>
+    <button class="btn secondary" onclick="showHome()">⌂ Menu inicial</button>
+    <div class="review"><h3>📚 Revisão rápida</h3><div id="review"></div></div>
+  </div>
+</section>
+<div class="footer">BioQuest • conteúdo educacional para revisão de Biologia</div>
+</div>
+
+<script>
+const questions = [
+ {cat:"Genética",q:"Durante a síntese proteica, qual molécula leva a informação do DNA até o ribossomo?",o:["RNA mensageiro (mRNA)","RNA transportador (tRNA)","RNA ribossômico (rRNA)","DNA polimerase"],a:0,e:"O mRNA é produzido na transcrição e transporta a informação genética do DNA para o ribossomo, onde será usada na tradução."},
+ {cat:"Ecologia",q:"Em uma cadeia alimentar, os organismos produtores são fundamentais porque:",o:["Produzem matéria orgânica a partir de energia disponível","Alimentam-se exclusivamente de outros animais","Decompõem restos de organismos","Ocupam sempre o último nível trófico"],a:0,e:"Produtores, como plantas e algas, sintetizam matéria orgânica principalmente por fotossíntese, formando a base das cadeias alimentares."},
+ {cat:"Evolução",q:"Segundo a seleção natural, uma característica tende a aumentar de frequência em uma população quando:",o:["Confere vantagem reprodutiva em determinado ambiente","Surge obrigatoriamente por necessidade do organismo","É sempre adquirida durante a vida e herdada","Impede completamente a existência de mutações"],a:0,e:"Características hereditárias que aumentam o sucesso reprodutivo podem tornar-se mais frequentes ao longo das gerações."},
+ {cat:"Citologia",q:"Qual organela é diretamente associada à produção de ATP durante a respiração celular aeróbica?",o:["Mitocôndria","Lisossomo","Complexo golgiense","Centríolo"],a:0,e:"A mitocôndria realiza etapas importantes da respiração celular aeróbica e produz grande parte do ATP utilizado pela célula."},
+ {cat:"Fisiologia",q:"Qual é uma função importante da insulina no organismo humano?",o:["Favorecer a entrada de glicose em determinadas células e reduzir a glicemia","Aumentar diretamente a frequência cardíaca","Transportar oxigênio pelos glóbulos vermelhos","Produzir anticorpos nos linfonodos"],a:0,e:"A insulina, produzida pelo pâncreas, ajuda a controlar a glicemia, favorecendo a captação e o armazenamento de glicose."},
+ {cat:"Metabolismo",q:"Na fotossíntese, a energia luminosa é convertida principalmente em:",o:["Energia química armazenada em moléculas orgânicas","Energia térmica armazenada no solo","Energia mecânica dos movimentos celulares","Energia nuclear armazenada na água"],a:0,e:"A fotossíntese transforma energia luminosa em energia química, que fica armazenada nas moléculas orgânicas produzidas."},
+ {cat:"Genética",q:"Se dois indivíduos heterozigotos Aa forem cruzados, qual é a probabilidade esperada de um descendente aa?",o:["25%","50%","75%","100%"],a:0,e:"No cruzamento Aa × Aa, as combinações esperadas são AA, Aa, Aa e aa. Portanto, aa corresponde a 1 de 4, ou 25%."},
+ {cat:"Ecologia",q:"O que caracteriza uma relação de mutualismo?",o:["As duas espécies envolvidas obtêm benefício","Uma espécie se beneficia e a outra é prejudicada obrigatoriamente","Nenhuma das espécies é afetada","Apenas uma espécie se beneficia sem afetar a outra"],a:0,e:"No mutualismo, a interação traz benefício para ambas as espécies. Dependendo do caso, a associação pode ser obrigatória ou não."},
+ {cat:"Fisiologia",q:"Qual sistema é responsável principalmente pelas trocas gasosas entre o organismo e o ambiente?",o:["Sistema respiratório","Sistema digestório","Sistema urinário","Sistema endócrino"],a:0,e:"O sistema respiratório realiza as trocas gasosas, permitindo a entrada de oxigênio e a eliminação de dióxido de carbono."},
+ {cat:"Evolução",q:"Qual processo aumenta a variabilidade genética ao introduzir novas versões de genes?",o:["Mutação","Respiração celular","Osmose","Digestão"],a:0,e:"Mutações são alterações no material genético. Algumas podem originar novos alelos e aumentar a variabilidade genética."}
+];
+
+let current=0, score=0, lives=3, combo=0, maxCombo=0, correct=0, time=20, timerId=null, answered=false, history=[];
+let record=Number(localStorage.getItem("bioRecord")||0), xp=Number(localStorage.getItem("bioXP")||0);
+document.getElementById("record").textContent=record; document.getElementById("xp").textContent=xp;
+
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active")}
+function showHome(){clearInterval(timerId);show("home")}
+function startGame(){
+ current=0;score=0;lives=3;combo=0;maxCombo=0;correct=0;history=[];show("quiz");loadQuestion();
+}
+function loadQuestion(){
+ answered=false; clearInterval(timerId); time=20;
+ const q=questions[current];
+ document.getElementById("progressText").textContent=`Pergunta ${current+1} de ${questions.length}`;
+ document.getElementById("bar").style.width=`${(current/questions.length)*100}%`;
+ document.getElementById("category").textContent=q.cat.toUpperCase();
+ document.getElementById("question").textContent=q.q;
+ document.getElementById("lives").textContent="❤️".repeat(lives)+"🖤".repeat(3-lives);
+ document.getElementById("timer").textContent=time+"s";document.getElementById("timer").classList.remove("danger");
+ document.getElementById("explanation").classList.remove("show");document.getElementById("nextBtn").style.display="none";
+ const box=document.getElementById("options");box.innerHTML="";
+ q.o.forEach((opt,i)=>{
+   const b=document.createElement("button");b.className="option";b.innerHTML=`<span class="letter">${String.fromCharCode(65+i)}</span><span>${opt}</span>`;
+   b.onclick=()=>answer(i,b);box.appendChild(b);
+ });
+ timerId=setInterval(()=>{time--;document.getElementById("timer").textContent=time+"s";if(time<=5)document.getElementById("timer").classList.add("danger");if(time<=0){clearInterval(timerId);answer(-1,null)}},1000);
+}
+function answer(index,button){
+ if(answered)return;answered=true;clearInterval(timerId);
+ const q=questions[current], isCorrect=index===q.a;
+ document.querySelectorAll(".option").forEach((b,i)=>{b.disabled=true;if(i===q.a)b.classList.add("correct");});
+ if(button && !isCorrect)button.classList.add("wrong");
+ if(isCorrect){
+   correct++;combo++;maxCombo=Math.max(maxCombo,combo);
+   const gained=100+Math.max(0,time)*5+(combo-1)*25;score+=gained;xp+=gained;
+   document.getElementById("explanation").innerHTML=`<strong>✨ +${gained} pontos</strong><br>${q.e}`;
+ }else{
+   lives--;combo=0;
+   document.getElementById("explanation").innerHTML=`<strong style="color:#ff9aaa">💡 Atenção!</strong><br>${q.e}`;
+ }
+ history.push({q:q.q,correct:isCorrect,answer:q.o[q.a]});
+ document.getElementById("lives").textContent="❤️".repeat(lives)+"🖤".repeat(3-lives);
+ document.getElementById("explanation").classList.add("show");
+ document.getElementById("nextBtn").style.display="inline-flex";
+}
+function nextQuestion(){
+ if(lives<=0 || current>=questions.length-1){finish();return}
+ current++;loadQuestion();
+}
+function finish(){
+ clearInterval(timerId);
+ if(score>record){record=score;localStorage.setItem("bioRecord",record)}
+ localStorage.setItem("bioXP",xp);
+ document.getElementById("record").textContent=record;document.getElementById("xp").textContent=xp;
+ document.getElementById("finalScore").textContent=score;
+ document.getElementById("correctCount").textContent=correct;
+ document.getElementById("accuracy").textContent=Math.round(correct/questions.length*100)+"%";
+ document.getElementById("comboMax").textContent=maxCombo+"x";
+ const rank=score>=1400?"🧬 Mestre da Biologia":score>=1000?"🔬 Cientista avançado":score>=650?"🌱 Pesquisador": "📖 Pesquisador iniciante";
+ document.getElementById("rank").textContent=rank;
+ document.getElementById("review").innerHTML=history.map((h,i)=>`<div class="review-item"><b>${i+1}. ${h.correct?"✅":"❌"} ${h.q}</b><span>Resposta: ${h.answer}</span></div>`).join("");
+ show("results");
+}
+</script>
+</body>
+</html>
